@@ -1,0 +1,40 @@
+# Example: Sandbox with persistentStorage declaring three persisted paths.
+#
+# On first boot:
+#   - an init container (same image as main) copies /root and /usr/local
+#     from the image's original filesystem into PVC subpaths
+#   - /workspace starts empty (bootstrapFromImage: false)
+# On subsequent boots, the init container short-circuits (subpaths are
+# non-empty) and the main container sees the user's accumulated state.
+apiVersion: agents.x-k8s.io/v1alpha1
+kind: Sandbox
+metadata:
+  name: example-persistent
+  namespace: default
+spec:
+  podTemplate:
+    spec:
+      containers:
+        - name: main
+          image: ghcr.io/example/python-agent:latest
+
+  persistentStorage:
+    # Single PVC backing all mounts (cheaper than one PVC per path;
+    # RWO is sufficient since only the main container reads/writes).
+    size: 20Gi
+    # storageClassName: standard-rwo  # optional
+
+    mounts:
+      # dotfiles + shell history + oh-my-zsh etc. Seeded from image's
+      # default /root on first boot, preserved across restarts.
+      - path: /root
+        bootstrapFromImage: true
+
+      # user-installed binaries: `pip install --user`, `npm i -g`, etc.
+      - path: /usr/local
+        bootstrapFromImage: true
+
+      # pure user data — the historical volumeClaimTemplates use case.
+      # Start empty; no image content to seed from.
+      - path: /workspace
+        bootstrapFromImage: false

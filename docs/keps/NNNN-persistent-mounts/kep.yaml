@@ -1,0 +1,11 @@
+title: Multi-Path Persistent Storage for Sandbox
+kep-number: NNNN
+authors:
+  - "@Gamattention"
+status: provisional
+creation-date: "2026-05-09"
+last-updated: "2026-05-09"
+stage: alpha
+
+see-also:
+  - "/keps/174-metadata-propagation"

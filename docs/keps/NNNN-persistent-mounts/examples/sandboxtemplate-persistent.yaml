@@ -1,0 +1,37 @@
+# Example: SandboxTemplate with platform-level persistent paths.
+#
+# Operators publishing a template can pre-declare which paths should
+# persist; every Sandbox derived from this template inherits the spec.
+# Individual Sandboxes may still add additional persistent paths of
+# their own (they are merged, with Sandbox-level entries winning on
+# Path collision — the validating webhook catches duplicates).
+apiVersion: extensions.agents.x-k8s.io/v1alpha1
+kind: SandboxTemplate
+metadata:
+  name: python-dev-persistent
+  namespace: default
+spec:
+  podTemplate:
+    spec:
+      containers:
+        - name: main
+          image: ghcr.io/example/python-agent:latest
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+
+  persistentStorage:
+    size: 30Gi
+    mounts:
+      - path: /root
+        bootstrapFromImage: true
+      - path: /usr/local
+        bootstrapFromImage: true
+      - path: /opt
+        bootstrapFromImage: true
+      - path: /workspace
+        bootstrapFromImage: false
